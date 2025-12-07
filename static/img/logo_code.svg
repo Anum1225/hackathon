@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="mainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Outer Hexagon Ring -->
+  <path d="M50 5 L93.3 30 V80 L50 105 L6.7 80 V30 Z" stroke="url(#mainGrad)" stroke-width="4" fill="none" transform="scale(0.85) translate(8.5, -5)" filter="url(#glow)"/>
+  
+  <!-- Inner Circuit Nodes -->
+  <circle cx="50" cy="50" r="8" fill="url(#mainGrad)" />
+  <circle cx="50" cy="25" r="4" fill="#06b6d4" />
+  <circle cx="72" cy="62" r="4" fill="#7c3aed" />
+  <circle cx="28" cy="62" r="4" fill="#7c3aed" />
+  
+  <!-- Connections -->
+  <path d="M50 42 L50 29" stroke="url(#mainGrad)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M56 54 L69 60" stroke="url(#mainGrad)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M44 54 L31 60" stroke="url(#mainGrad)" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Tech Accents -->
+  <path d="M85 50 L95 50" stroke="#06b6d4" stroke-width="2" opacity="0.6"/>
+  <path d="M5 50 L15 50" stroke="#7c3aed" stroke-width="2" opacity="0.6"/>
+</svg>

@@ -1,0 +1,277 @@
+/* Modal Overlay - Smoother Fade in */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Light Mode Overlay */
+:global(html[data-theme='light']) .overlay {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+/* Modal Content Card */
+.modalCard {
+    width: 90%;
+    max-width: 450px;
+    /* Increased to 450px to fit 2x2 grid comfortably */
+    background:
+        radial-gradient(ellipse at 20% 0%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(6, 182, 212, 0.12) 0%, transparent 45%),
+        linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 28px;
+    padding: 2.25rem;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 30px 60px -12px rgba(0, 0, 0, 0.8),
+        0 0 60px rgba(124, 58, 237, 0.15);
+
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    /* Elegant easing */
+    color: white;
+}
+
+/* Light Mode Card */
+:global(html[data-theme='light']) .modalCard {
+    background:
+        radial-gradient(ellipse at 20% 0%, rgba(124, 58, 237, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(6, 182, 212, 0.05) 0%, transparent 45%),
+        linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
+
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.02),
+        0 25px 50px -12px rgba(0, 0, 0, 0.1),
+        0 0 30px rgba(124, 58, 237, 0.05);
+    color: #1e293b;
+}
+
+/* Premium Wrapper Transition: Slide Up + Mild Scale */
+.wrapperTransition {
+    animation: premiumSlide 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+    width: 100%;
+}
+
+@keyframes premiumSlide {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Typography styles same as before, tweaked for spacing */
+.title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #a78bfa 0%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+:global(html[data-theme='light']) .subtitle {
+    color: #64748b;
+}
+
+/* Grid 2x2 for Details */
+.grid2x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* Premium Option Card */
+.optionCard {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1.25rem 0.5rem;
+    border-radius: 16px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 120px;
+    position: relative;
+}
+
+.optionCard:hover {
+    transform: translateY(-4px);
+    background: rgba(139, 92, 246, 0.05);
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+}
+
+:global(html[data-theme='light']) .optionCard {
+    background: white;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+:global(html[data-theme='light']) .optionCard:hover {
+    background: #f8fafc;
+    border-color: #7c3aed;
+}
+
+/* Selected State - Glowing Border */
+.selected {
+    background: rgba(139, 92, 246, 0.1) !important;
+    border: 1px solid #8b5cf6 !important;
+    box-shadow:
+        0 0 0 1px #8b5cf6,
+        0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+:global(html[data-theme='light']) .selected {
+    background: rgba(124, 58, 237, 0.05) !important;
+    border-color: #7c3aed !important;
+    box-shadow: 0 0 0 1px #7c3aed;
+}
+
+.cardTitle {
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-top: 0.75rem;
+    display: block;
+}
+
+:global(html[data-theme='light']) .cardTitle {
+    color: #1e293b;
+}
+
+.cardDesc {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+:global(html[data-theme='light']) .cardDesc {
+    color: #64748b;
+}
+
+/* Buttons & Inputs (Standardized) */
+.inputGroup {
+    margin-bottom: 1rem;
+}
+
+.label {
+    display: block;
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+}
+
+:global(html[data-theme='light']) .label {
+    color: #475569;
+}
+
+.input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    font-size: 0.95rem;
+}
+
+:global(html[data-theme='light']) .input {
+    background: white;
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+}
+
+.primaryBtn {
+    width: 100%;
+    padding: 0.9rem;
+    margin-top: 1.5rem;
+    background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.tbt {
+    background: transparent;
+    border: none;
+    color: #06b6d4;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-left: 0.4rem;
+    text-decoration: underline;
+    text-decoration-color: rgba(6, 182, 212, 0.3);
+}
+
+:global(html[data-theme='light']) .tbt {
+    color: #0891b2;
+}
+
+.closeButton {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+}
+
+:global(html[data-theme='light']) .closeButton {
+    background: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.5);
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

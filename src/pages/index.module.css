@@ -1,0 +1,42 @@
+/**
+ * CSS modules for the homepage
+ */
+
+.heroBanner {
+    padding: 8rem 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    background: var(--ifm-background-surface-color);
+    /* Subtle grid pattern */
+    background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+}
+
+.heroTitle {
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+}
+
+.heroSubtitle {
+    font-size: 1.5rem;
+    font-weight: 400;
+    max-width: 800px;
+    margin: 0 auto 32px;
+    opacity: 0.8;
+}
+
+.buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media screen and (max-width: 996px) {
+    .heroBanner {
+        padding: 6rem 0;
+    }
+}

@@ -1,0 +1,184 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* Custom Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Premium Brand Colors */
+    --ifm-color-primary: #7c3aed;
+    --ifm-color-primary-dark: #6d28d9;
+    --ifm-color-primary-darker: #5b21b6;
+    --ifm-color-primary-darkest: #4c1d95;
+    --ifm-color-primary-light: #8b5cf6;
+    --ifm-color-primary-lighter: #a78bfa;
+    --ifm-color-primary-lightest: #c4b5fd;
+
+    --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+    /* Font Families */
+    --ifm-font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+    --ifm-heading-font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+}
+
+/* Dark Mode Overrides (matches the project's dark theme preference) */
+[data-theme='dark'] {
+    --ifm-color-primary: #a78bfa;
+    --ifm-color-primary-dark: #8b5cf6;
+    --ifm-color-primary-darker: #7c3aed;
+    --ifm-color-primary-darkest: #6d28d9;
+    --ifm-color-primary-light: #c4b5fd;
+    --ifm-color-primary-lighter: #ddd6fe;
+    --ifm-color-primary-lightest: #ede9fe;
+
+    --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+    /* Deep Space Background */
+    --ifm-background-color: #0f172a;
+    --ifm-background-surface-color: #1e293b;
+
+    /* Global Gradient Mesh */
+    background-image:
+        radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(124, 58, 237, 0.15) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+    background-attachment: fixed;
+}
+
+/* Premium Gradients & Utilities */
+.gradient-text {
+    background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+
+.hero-button {
+    background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px 0 rgba(124, 58, 237, 0.39);
+}
+
+.hero-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.23);
+    opacity: 0.9;
+}
+
+/* Animations */
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.animate-fade-in {
+    animation: fadeIn 1s ease-out forwards;
+}
+
+/* Glassmorphism */
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-5px);
+    border-color: var(--ifm-color-primary);
+    box-shadow: 0 10px 30px -10px rgba(124, 58, 237, 0.3);
+}
+
+/* Bento Grid Layout */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    padding: 2rem 0;
+}
+
+/* Infinity Marquee */
+.marquee-container {
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-content {
+    display: inline-flex;
+    gap: 4rem;
+    animation: scroll 30s linear infinite;
+}
+
+.marquee-content:hover {
+    animation-play-state: paused;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Ambient Glow */
+.ambient-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(60px);
+}
+
+.glow-top-right {
+    top: -200px;
+    right: -200px;
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+}
+
+.glow-bottom-left {
+    bottom: -200px;
+    left: -200px;
+}
