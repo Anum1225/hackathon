@@ -70,7 +70,7 @@ function HomepageHeader() {
                             </Link>
                             <Link
                                 className="button button--secondary button--lg glass-card"
-                                to="https://github.com/panaversity/physical-ai-book"
+                                to="https://github.com/Anum1225/hackathon/"
                                 style={{
                                     marginLeft: '20px',
                                     padding: '18px 36px',
