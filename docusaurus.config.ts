@@ -32,7 +32,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl:
-            'https://github.com/panaversity/physical-ai-book/tree/main/',
+            'https://github.com/Anum1225/hackathon/',
         },
         blog: false,
         theme: {
@@ -79,7 +79,7 @@ const config: Config = {
           position: 'right',
         },
         {
-          href: 'https://github.com/panaversity/physical-ai-book',
+          href: 'https://github.com/Anum1225/hackathon/',
           label: 'GitHub',
           position: 'right',
         },
