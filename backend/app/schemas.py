@@ -18,8 +18,10 @@ class UserProfileResponse(UserProfileBase):
 class ChatRequest(BaseModel):
     message: str
     selected_text: Optional[str] = None
-    history: list[dict] = [] # List of {"role": "user/assistant", "content": "..."}
+    history: list[dict] = []
     user_id: Optional[str] = None
+    translate_to_urdu: bool = False
+    personalize: bool = False
 
 class ChatResponse(BaseModel):
     response: str
