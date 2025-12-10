@@ -82,36 +82,72 @@ const Chatbot = React.forwardRef<ChatbotRef>((props, ref) => {
             timestamp: new Date()
         };
 
-        setMessages(prev => [...prev, userMsg]);
+        const newMessages = [...messages, userMsg];
+        setMessages(newMessages);
         setInputText('');
         setIsTyping(true);
 
-        setTimeout(() => {
-            let botText = "I'm checking the textbook for: " + text;
-            let isHtml = false;
+        try {
+            // Prepare history for API
+            const history = messages
+                .filter(m => m.id !== '1') // Skip welcome
+                .map(m => ({
+                    role: m.sender,
+                    content: m.text
+                }));
 
-            if (text.toLowerCase().includes('physical ai')) {
-                botText = "<b>Physical AI</b> combines three core elements:<br/><br/><ul><li><b>AI/ML:</b> The brain (Policy)</li><li><b>Physics:</b> The environment (Gravity)</li><li><b>Hardware:</b> The body (Actuators)</li></ul>";
-                isHtml = true;
-            } else if (text.toLowerCase().includes('ros 2')) {
-                botText = "ROS 2 Concepts:<br/><table><thead><tr><th>Concept</th><th>Description</th></tr></thead><tbody><tr><td>Node</td><td>A process performing computation</td></tr><tr><td>Topic</td><td>Data bus for streaming</td></tr><tr><td>Service</td><td>Request/Response calls</td></tr></tbody></table>";
-                isHtml = true;
-            } else if (text.includes('Explain this:')) {
-                botText = `Great question! Here's a breakdown of <b>"${text.replace('Explain this:', '').trim()}"</b>:<br/><br/>1. <b>Context:</b> Used in robotics simulations.<br/>2. <b>Application:</b> Critical for navigation.<br/>3. <b>Tip:</b> Check Week 4 for code examples.`;
-                isHtml = true;
-            }
+            const userId = localStorage.getItem('user_id');
+
+            const res = await fetch('http://localhost:8000/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: text,
+                    history: history,
+                    user_id: userId || undefined
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.detail || 'Failed to get response');
+
+            const botText = data.response;
+            // The backend returns markdown. We might need a markdown parser. 
+            // For now, simpler to just display text or simple HTML formatting if backend returns it.
+            // Our backend returns text. 
+            // Ideally we use a library like 'react-markdown' but for hackathon speed we'll just render text 
+            // or simple replace \n with <br>.
+
+            // Basic Markdown to HTML (Bold/List) - very rudimentary
+            const formattedText = botText
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/\n/g, '<br/>')
+                .replace(/- (.*?)(<br\/>|$)/g, '<li>$1</li>');
 
             const botMsg: Message = {
                 id: (Date.now() + 1).toString(),
-                text: botText,
+                text: formattedText,
                 sender: 'bot',
                 timestamp: new Date(),
-                isHtml
+                isHtml: true,
+                sources: data.sources // Assuming interface update if we want to show sources
             };
 
             setMessages(prev => [...prev, botMsg]);
+
+        } catch (error) {
+            console.error(error);
+            const errorMsg: Message = {
+                id: Date.now().toString(),
+                text: "Sorry, I'm having trouble connecting to the brain. Please try again.",
+                sender: 'bot',
+                timestamp: new Date()
+            };
+            setMessages(prev => [...prev, errorMsg]);
+        } finally {
             setIsTyping(false);
-        }, 1200);
+        }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {

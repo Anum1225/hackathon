@@ -18,6 +18,8 @@ export default function Root({ children }) {
             const target = e.target.closest('a');
 
             // Check if it's the login link
+            // IMPORTANT: Only intercept if the href is EXACTLY /auth/login
+            // If we've changed it to /profile, this check MUST fail.
             if (target && target.getAttribute('href') === '/auth/login') {
                 e.preventDefault(); // STOP navigation
                 e.stopPropagation(); // STOP other handlers (dropdowns etc)
@@ -60,16 +62,42 @@ export default function Root({ children }) {
         // Force cleanup selection on route change
         setSelection(null);
 
+        // Navbar Login -> Profile Swap Logic
+        const updateNavbar = () => {
+            const userName = localStorage.getItem('user_name');
+            const loginLink = document.querySelector('a[href="/auth/login"]');
+
+            if (userName && loginLink) {
+                // Check if already updated to avoid infinite loop of mutations if we were changing attributes that trigger it
+                // But since we change href, the querySelector won't match anymore!
+
+                loginLink.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user" style="margin-right: 6px; vertical-align: text-bottom;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ${userName}`;
+                loginLink.setAttribute('href', '/profile');
+            }
+        };
+
+        // Mutation Observer to handle Docusaurus re-renders/hydration
+        const observer = new MutationObserver(() => {
+            updateNavbar();
+        });
+
+        // Start observing the body for changes
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        // Initial check
+        updateNavbar();
+
         // Add Capture phase listener for maximum priority on links
         document.addEventListener('click', handleLinkClick, true);
         document.addEventListener('mouseup', handleSelection);
         document.addEventListener('scroll', () => setSelection(null));
 
         return () => {
+            observer.disconnect();
             document.removeEventListener('click', handleLinkClick, true);
             document.removeEventListener('mouseup', handleSelection);
         };
-    }, [location.pathname]); // Re-run if route changes (though mainly for cleanup)
+    }, []); // Run once on mount, let Observer handle the rest
 
     const handleAskAI = (e) => {
         e.stopPropagation();
@@ -93,11 +121,11 @@ export default function Root({ children }) {
                     id="ask-ai-btn"
                     onClick={handleAskAI}
                     style={{
-                        position: 'absolute',
-                        top: selection.y,
+                        position: 'fixed', // Changed from absolute to fixed to prevent scrolling issues
+                        top: selection.y - 40, // Adjusted positioning
                         left: selection.x,
-                        transform: 'translate(-50%, -100%)',
-                        zIndex: 2147483648,
+                        transform: 'translate(-50%, 0)',
+                        zIndex: 999999, // High Z-Index
                         background: 'linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%)',
                         border: 'none',
                         borderRadius: '20px',
@@ -117,8 +145,8 @@ export default function Root({ children }) {
                     Ask AI
                     <style>{`
                         @keyframes popIn {
-                            from { opacity: 0; transform: translate(-50%, -80%) scale(0.8); }
-                            to { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+                            from { opacity: 0; transform: translate(-50%, 20px) scale(0.8); }
+                            to { opacity: 1; transform: translate(-50%, 0) scale(1); }
                         }
                     `}</style>
                 </button>

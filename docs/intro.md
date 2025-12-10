@@ -11,6 +11,15 @@ description: 'Physical AI & Humanoid Robotics - Bridging the digital brain and p
 
 # 🤖 Physical AI & Humanoid Robotics
 
+import { PersonalizationButton, UrduTranslationButton, ButtonContainer } from '@site/src/components/ModuleButtons';
+
+<ButtonContainer>
+    <PersonalizationButton />
+    <UrduTranslationButton />
+</ButtonContainer>
+
+<div id="module-content">
+
 > **The future of work** will be a partnership between people, intelligent agents (AI software), and robots. This shift won't necessarily eliminate jobs but will change what humans do, leading to a massive demand for new skills.
 
 :::info Course Goals
@@ -158,3 +167,5 @@ This course requires **RTX GPUs** for NVIDIA Isaac Sim. Standard laptops will no
 - [NVIDIA Isaac Documentation](https://docs.omniverse.nvidia.com/isaacsim/)
 - [Gazebo Sim](https://gazebosim.org/docs)
 - [Panaversity](https://panaversity.org)
+
+</div>

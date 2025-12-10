@@ -23,14 +23,100 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }: Au
         hardware: ''
     });
 
+    // Signup Data State
+    const [signupData, setSignupData] = useState({ name: '', email: '', password: '' });
+    const [loginData, setLoginData] = useState({ email: '', password: '' });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const API_URL = 'http://localhost:8000/api';
+
     // Reset when opened
     useEffect(() => {
         if (isOpen) {
             setView(initialView);
             setStep(1);
             setSelections({ role: '', exp: '', hardware: '' });
+            setSignupData({ name: '', email: '', password: '' });
+            setLoginData({ email: '', password: '' });
+            setError('');
         }
     }, [isOpen, initialView]);
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        try {
+            const res = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(loginData)
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.detail || 'Login failed');
+
+            // Save session
+            localStorage.setItem('user_id', data.user_id);
+            localStorage.setItem('user_name', data.name);
+            localStorage.setItem('user_email', data.email);
+
+            // Reload page to reflect auth state (simple way) or just close
+            // Redirect to Profile page
+            window.location.href = '/profile';
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSignupStep = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Just move to onboarding, data is already in state
+        setView('onboarding');
+    };
+
+    const handleFinalize = async () => {
+        setLoading(true);
+        setError('');
+        try {
+            // 1. Signup
+            const signupRes = await fetch(`${API_URL}/auth/signup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(signupData)
+            });
+            const userData = await signupRes.json();
+            if (!signupRes.ok) throw new Error(userData.detail || 'Signup failed');
+
+            localStorage.setItem('user_id', userData.user_id);
+            localStorage.setItem('user_name', userData.name);
+            localStorage.setItem('user_email', userData.email);
+
+            // 2. Create Profile
+            const profileData = {
+                software_background: `Role: ${selections.role}, Experience: ${selections.exp}`,
+                hardware_background: `Hardware: ${selections.hardware}`,
+                preferred_language: 'en' // Default for now
+            };
+
+            await fetch(`${API_URL}/auth/profile/${userData.user_id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(profileData)
+            });
+
+            // Redirect to Profile page
+            window.location.href = '/profile';
+        } catch (err: any) {
+            setError(err.message);
+            // Go back to signup if error? Or just show error
+            alert(`Error: ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -48,18 +134,34 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }: Au
                     <div className={styles.wrapperTransition} key="login">
                         <h2 className={styles.title}>Welcome Back</h2>
                         <p className={styles.subtitle}>Sign in to your Physical AI workspace.</p>
+                        {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
 
-                        <form onSubmit={(e) => { e.preventDefault(); onClose(); }}>
+                        <form onSubmit={handleLogin}>
                             <div className={styles.inputGroup}>
                                 <label className={styles.label}>Email Address</label>
-                                <input className={styles.input} type="email" placeholder="student@example.com" autoFocus />
+                                <input
+                                    className={styles.input}
+                                    type="email"
+                                    placeholder="student@example.com"
+                                    autoFocus
+                                    value={loginData.email}
+                                    onChange={e => setLoginData({ ...loginData, email: e.target.value })}
+                                    required
+                                />
                             </div>
                             <div className={styles.inputGroup}>
                                 <label className={styles.label}>Password</label>
-                                <input className={styles.input} type="password" placeholder="••••••••" />
+                                <input
+                                    className={styles.input}
+                                    type="password"
+                                    placeholder="••••••••"
+                                    value={loginData.password}
+                                    onChange={e => setLoginData({ ...loginData, password: e.target.value })}
+                                    required
+                                />
                             </div>
-                            <button type="submit" className={styles.primaryBtn}>
-                                Sign In
+                            <button type="submit" className={styles.primaryBtn} disabled={loading}>
+                                {loading ? 'Signing In...' : 'Sign In'}
                             </button>
                         </form>
 
@@ -75,21 +177,43 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }: Au
                         <h2 className={styles.title}>Start Learning</h2>
                         <p className={styles.subtitle}>Join the Physical AI revolution today.</p>
 
-                        <form onSubmit={(e) => { e.preventDefault(); setView('onboarding'); }}>
+                        <form onSubmit={handleSignupStep}>
                             <div className={styles.inputGroup}>
                                 <label className={styles.label}>Full Name</label>
-                                <input className={styles.input} type="text" placeholder="John Doe" autoFocus />
+                                <input
+                                    className={styles.input}
+                                    type="text"
+                                    placeholder="John Doe"
+                                    autoFocus
+                                    value={signupData.name}
+                                    onChange={e => setSignupData({ ...signupData, name: e.target.value })}
+                                    required
+                                />
                             </div>
                             <div className={styles.inputGroup}>
                                 <label className={styles.label}>Email Address</label>
-                                <input className={styles.input} type="email" placeholder="student@example.com" />
+                                <input
+                                    className={styles.input}
+                                    type="email"
+                                    placeholder="student@example.com"
+                                    value={signupData.email}
+                                    onChange={e => setSignupData({ ...signupData, email: e.target.value })}
+                                    required
+                                />
                             </div>
                             <div className={styles.inputGroup}>
                                 <label className={styles.label}>Password</label>
-                                <input className={styles.input} type="password" placeholder="Create robust password" />
+                                <input
+                                    className={styles.input}
+                                    type="password"
+                                    placeholder="Create robust password"
+                                    value={signupData.password}
+                                    onChange={e => setSignupData({ ...signupData, password: e.target.value })}
+                                    required
+                                />
                             </div>
                             <button type="submit" className={styles.primaryBtn}>
-                                Create Account <ArrowRight size={18} />
+                                Continue <ArrowRight size={18} />
                             </button>
                         </form>
 
@@ -221,8 +345,8 @@ export default function AuthModal({ isOpen, onClose, initialView = 'login' }: Au
                                 <p className={styles.subtitle} style={{ marginBottom: '2.5rem' }}>
                                     Your tailored learning path is generated.
                                 </p>
-                                <button className={styles.primaryBtn} onClick={onClose}>
-                                    Launch Dashboard
+                                <button className={styles.primaryBtn} onClick={handleFinalize} disabled={loading}>
+                                    {loading ? 'Setting up...' : 'Launch Dashboard'}
                                 </button>
                             </div>
                         )}
