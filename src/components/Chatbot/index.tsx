@@ -1,14 +1,15 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './styles.module.css';
-import { MessageSquare, X, Send, Bot, Sparkles, Trash2 } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, Sparkles, Trash2, Languages, Smile } from 'lucide-react';
 
 interface Message {
     id: string;
     text: string;
     sender: 'user' | 'bot';
     timestamp: Date;
-    isHtml?: boolean; // Flag to render as HTML
+    isHtml?: boolean;
+    isUrdu?: boolean;
 }
 
 export interface ChatbotRef {
@@ -17,18 +18,31 @@ export interface ChatbotRef {
 
 const Chatbot = React.forwardRef<ChatbotRef>((props, ref) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [isClosing, setIsClosing] = useState(false); // For exit animation
-    const [messages, setMessages] = useState<Message[]>([
-        {
+    const [isClosing, setIsClosing] = useState(false);
+    const [inputText, setInputText] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
+    const [isUrdu, setIsUrdu] = useState(false);
+    const [isPersonalized, setIsPersonalized] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    
+    const userId = localStorage.getItem('user_id') || 'guest';
+    const storageKey = `chatHistory_${userId}`;
+    
+    const [messages, setMessages] = useState<Message[]>(() => {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                return parsed.map(m => ({ ...m, timestamp: new Date(m.timestamp) }));
+            } catch { }
+        }
+        return [{
             id: '1',
             text: "Hello! I'm your Physical AI assistant. Ask me about ROS 2 or Robotics.",
             sender: 'bot',
             timestamp: new Date()
-        }
-    ]);
-    const [inputText, setInputText] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+        }];
+    });
 
     const startMessages = [
         "What is Physical AI?",
@@ -56,12 +70,14 @@ const Chatbot = React.forwardRef<ChatbotRef>((props, ref) => {
     };
 
     const handleClear = () => {
-        setMessages([{
+        const newMsgs = [{
             id: Date.now().toString(),
             text: "Chat cleared. Start a new topic!",
             sender: 'bot',
             timestamp: new Date()
-        }]);
+        }];
+        setMessages(newMsgs);
+        localStorage.setItem(storageKey, JSON.stringify(newMsgs));
     };
 
     const scrollToBottom = () => {
@@ -71,6 +87,10 @@ const Chatbot = React.forwardRef<ChatbotRef>((props, ref) => {
     useEffect(() => {
         if (isOpen) scrollToBottom();
     }, [messages, isTyping, isOpen]);
+    
+    useEffect(() => {
+        localStorage.setItem(storageKey, JSON.stringify(messages));
+    }, [messages, storageKey]);
 
     const handleSend = async (text: string) => {
         if (!text.trim()) return;
@@ -104,7 +124,9 @@ const Chatbot = React.forwardRef<ChatbotRef>((props, ref) => {
                 body: JSON.stringify({
                     message: text,
                     history: history,
-                    user_id: userId || undefined
+                    user_id: userId || undefined,
+                    translate_to_urdu: isUrdu,
+                    personalize: isPersonalized
                 })
             });
 
@@ -112,18 +134,41 @@ const Chatbot = React.forwardRef<ChatbotRef>((props, ref) => {
 
             if (!res.ok) throw new Error(data.detail || 'Failed to get response');
 
-            const botText = data.response;
-            // The backend returns markdown. We might need a markdown parser. 
-            // For now, simpler to just display text or simple HTML formatting if backend returns it.
-            // Our backend returns text. 
-            // Ideally we use a library like 'react-markdown' but for hackathon speed we'll just render text 
-            // or simple replace \n with <br>.
-
-            // Basic Markdown to HTML (Bold/List) - very rudimentary
-            const formattedText = botText
-                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-                .replace(/\n/g, '<br/>')
-                .replace(/- (.*?)(<br\/>|$)/g, '<li>$1</li>');
+            let botText = data.response;
+            
+            // Enhanced formatting
+            let formattedText = botText
+                .replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>')
+                .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+                .replace(/\*(.+?)\*/g, '<i>$1</i>')
+                .replace(/`(.+?)`/g, '<code>$1</code>');
+            
+            // Tables
+            formattedText = formattedText.replace(/\|(.+?)\|/g, (match) => {
+                const cells = match.split('|').filter(c => c.trim());
+                return '<tr>' + cells.map(c => `<td>${c.trim()}</td>`).join('') + '</tr>';
+            });
+            if (formattedText.includes('<tr>')) {
+                formattedText = '<table>' + formattedText + '</table>';
+            }
+            
+            // Lists with emojis for personalized mode
+            if (isPersonalized) {
+                formattedText = formattedText
+                    .replace(/^(\d+)\. (.+)$/gm, '✨ <b>$1.</b> $2')
+                    .replace(/^- (.+)$/gm, '🔹 $1')
+                    .replace(/^\* (.+)$/gm, '⭐ $1');
+            } else {
+                formattedText = formattedText
+                    .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
+                    .replace(/^- (.+)$/gm, '<li>$1</li>')
+                    .replace(/^\* (.+)$/gm, '<li>$1</li>');
+                if (formattedText.includes('<li>')) {
+                    formattedText = '<ul>' + formattedText + '</ul>';
+                }
+            }
+            
+            formattedText = formattedText.replace(/\n/g, '<br/>');
 
             const botMsg: Message = {
                 id: (Date.now() + 1).toString(),
@@ -131,7 +176,7 @@ const Chatbot = React.forwardRef<ChatbotRef>((props, ref) => {
                 sender: 'bot',
                 timestamp: new Date(),
                 isHtml: true,
-                sources: data.sources // Assuming interface update if we want to show sources
+                isUrdu: isUrdu
             };
 
             setMessages(prev => [...prev, botMsg]);
@@ -179,6 +224,20 @@ const Chatbot = React.forwardRef<ChatbotRef>((props, ref) => {
                             <div className={styles.onlineBadge} />
                         </div>
                         <div className={styles.headerActions}>
+                            <button 
+                                className={`${styles.iconBtn} ${isUrdu ? styles.active : ''}`} 
+                                onClick={() => setIsUrdu(!isUrdu)} 
+                                title="Toggle Urdu"
+                            >
+                                <Languages size={16} />
+                            </button>
+                            <button 
+                                className={`${styles.iconBtn} ${isPersonalized ? styles.active : ''}`} 
+                                onClick={() => setIsPersonalized(!isPersonalized)} 
+                                title="Personalize"
+                            >
+                                <Smile size={16} />
+                            </button>
                             <button className={styles.iconBtn} onClick={handleClear} title="Clear Chat">
                                 <Trash2 size={16} />
                             </button>
@@ -193,7 +252,8 @@ const Chatbot = React.forwardRef<ChatbotRef>((props, ref) => {
                         {messages.map((msg) => (
                             <div
                                 key={msg.id}
-                                className={`${styles.message} ${msg.sender === 'user' ? styles.userMessage : styles.botMessage}`}
+                                className={`${styles.message} ${msg.sender === 'user' ? styles.userMessage : styles.botMessage} ${msg.isUrdu ? styles.urduMessage : ''}`}
+                                dir={msg.isUrdu ? 'rtl' : 'ltr'}
                             >
                                 {msg.isHtml ? (
                                     <span dangerouslySetInnerHTML={{ __html: msg.text }} />

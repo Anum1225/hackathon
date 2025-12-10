@@ -45,33 +45,52 @@ async def chat_endpoint(request: ChatRequest, db: AsyncSession = Depends(get_db)
         if request.selected_text:
             search_query = f"{request.selected_text} {request.message}"
 
+        print(f"Searching for: {search_query}")
+        
         embedding_resp = await aclient.embeddings.create(
             input=search_query,
             model="text-embedding-3-small"
         )
         query_vector = embedding_resp.data[0].embedding
+        print(f"Generated embedding of size: {len(query_vector)}")
 
         search_results = qdrant.search(
-            collection_name="textbook",
+            collection_name="textbook_content",
             query_vector=query_vector,
             limit=3
         )
+        print(f"Found {len(search_results)} search results")
         
-        for hit in search_results:
+        for i, hit in enumerate(search_results):
+            print(f"Result {i+1} score: {hit.score}")
             context_text += f"---\nSource: {hit.payload.get('source', 'Unknown')}\n{hit.payload.get('text', '')}\n"
             sources.append(hit.payload.get('source', 'Unknown'))
             
     except Exception as e:
         print(f"Vector search failed: {e}")
+        import traceback
+        traceback.print_exc()
         # Continue without context or with minimal context
         context_text += "\n[Note: Unable to retrieve textbook context at this moment. Answering based on general knowledge.]\n"
 
     # 3. Generate Response
+    personalize_instruction = ""
+    if request.personalize:
+        personalize_instruction = """Use emojis, friendly tone, and engaging formatting. 
+        Add relevant emojis to lists and headings. Make it fun and easy to read.
+        Use tables where appropriate with clear formatting."""
+    
+    urdu_instruction = ""
+    if request.translate_to_urdu:
+        urdu_instruction = "Translate your entire response to Urdu. Use proper Urdu script and RTL formatting."
+    
     system_prompt = f"""You are an AI teaching assistant for a Physical AI & Humanoid Robotics course.
     Use the provided context to answer the student's question.
     If the context doesn't contain the answer, use your general knowledge but mention that it's not in the text.
     
     {personalization_instruction}
+    {personalize_instruction}
+    {urdu_instruction}
     
     Context:
     {context_text}
