@@ -24,6 +24,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "lucide-react": "^0.556.0",
+    "mermaid": "^11.12.2",
     "pg": "^8.16.3",
     "prism-react-renderer": "^2.3.0",
     "react": "^19.0.0",
